@@ -8,12 +8,8 @@
 
 $modx->addPackage('minishop2', MODX_CORE_PATH.'components/minishop2/model/');
 
-$modx->getService('lexicon','modLexicon');
-$modx->lexicon->load($modx->config['manager_language'].':minishop2:widget');
-
 $q_where = "`date` + INTERVAL ".date('j')." DAY > NOW()";
 
-//Статистика за текущий месяц
 $chunkArr = array(
     'lang' => $modx->config['manager_language'],
     'new_count' => $modx->getCount('msOrder',array('status' => 1),$q_where),
@@ -40,7 +36,6 @@ $months = array(
 	'12' => 'Декабрь',
 );
 
-//Статистика по месяцам
 $stat_month = array();
 $sql = "
 SELECT month(`createdon`) AS `order_month`, count(*) AS `order_count`
@@ -57,8 +52,6 @@ if ($stmt && $stmt->execute()) {
     }
     $stmt->closeCursor();
 }
-
-//print_r($stat_month);
 
 $chunkArr['stat_month'] = json_encode($stat_month);
 
