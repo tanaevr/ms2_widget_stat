@@ -38,17 +38,16 @@ $months = array(
 
 $stat_month = array();
 $sql = "
-SELECT month(`createdon`) AS `order_month`, count(*) AS `order_count`
+SELECT month(`createdon`) AS `order_month`, count(*) AS `order_count`, SUM(cart_cost) AS order_cost
 FROM ".$modx->getTableName('msOrder')."
 WHERE year(`createdon`) = ".date('Y')." 
 GROUP BY month(`createdon`)
 ORDER BY month(`createdon`)
-LIMIT 5
 ";
 $stmt = $modx->prepare($sql);
 if ($stmt && $stmt->execute()) {
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)){
-        $stat_month[] = array("name"=>$months[$row['order_month']],"count"=>$row['order_count']);
+        $stat_month[] = array("name"=>$months[$row['order_month']],"count"=>$row['order_count'],"cost"=>$row['order_cost']);
     }
     $stmt->closeCursor();
 }
@@ -104,7 +103,7 @@ Ext.onReady(function(){
     });
     
     var store2 = new Ext.data.JsonStore({
-        fields:['name', 'count'],
+        fields:['name', 'count', 'cost'],
         data: [[+stat_month]]
     });
     
@@ -120,6 +119,7 @@ Ext.onReady(function(){
             store: store2,
             xField: 'name',
             yField: 'count',
+			yField: 'cost',
             border: false,
 			listeners: {
 				itemclick: function(o){
@@ -135,7 +135,7 @@ Ext.onReady(function(){
 			},
             series: [{
                 type: 'column',
-                displayName: '',
+                displayName: 'Кол-во заказов за',
                 yField: 'count',
                 style: {
                     image:'bar.gif',
@@ -144,10 +144,26 @@ Ext.onReady(function(){
                 }
             },{
                 type:'line',
-                displayName: '',
+                displayName: 'Кол-во заказов за',
                 yField: 'count',
                 style: {
                     color: 0x15428B
+                }
+            },{
+                type: 'column',
+                displayName: 'Доход за',
+                yField: 'cost',
+                style: {
+                    image:'bar.gif',
+                    mode: 'stretch',
+                    color:0x4db848
+                }
+            },{
+                type:'line',
+                displayName: 'Доход за',
+                yField: 'cost',
+                style: {
+                    color: 0x2c6829
                 }
             }]
         }
